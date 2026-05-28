@@ -106,22 +106,30 @@ Alpine.data('a5Editor', () => ({
     const file = event.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const imported = JSON.parse(e.target.result);
+        let added = 0;
+        let skipped = 0;
         for (const name in imported) {
           if (!this.sets[name]) {
+            // New entry — always add
             this.sets[name] = imported[name];
+            added++;
           } else {
+            // Conflict — keep the newer version
             const existDate = parseDate(this.sets[name].date);
             const impDate = parseDate(imported[name].date);
-            if (impDate < existDate) {
+            if (impDate > existDate) {
               this.sets[name] = imported[name];
+              added++;
+            } else {
+              skipped++;
             }
           }
         }
-        this.persistSets();
-        alert('Import completed.');
+        await this.persistSets();
+        alert(`Import completed.\nAdded/updated: ${added}\nSkipped (existing is newer): ${skipped}`);
       } catch {
         alert('Invalid JSON file.');
       }

@@ -156,14 +156,34 @@ Alpine.data('productionTracker', () => ({
     this.unfilledDays = unfilled;
   },
 
-  saveDay(day) {
+  saveDay(day, afterSave = null) {
     const allEmpty = this.products.every((p) => !day.inputs[p] || day.inputs[p] === 0);
+    const done = () => {
+      this.doSaveDay(day);
+      if (afterSave) afterSave();
+    };
     if (allEmpty) {
       this.confirmMessage = 'Всі поля порожні. Зберегти нульове виготовлення за цей день?';
-      this._confirmCb = () => this.doSaveDay(day);
+      this._confirmCb = done;
       this.$refs.confirmDialog.showModal();
     } else {
-      this.doSaveDay(day);
+      done();
+    }
+  },
+
+  saveDayAndFocusNext(event, day) {
+    this.saveDay(day, () => {
+      setTimeout(() => this.focusFirstUnfilledInput(), 1000);
+    });
+  },
+
+  focusFirstUnfilledInput() {
+    const firstEntry = document.querySelector('.editor-panel .day-entry');
+    if (!firstEntry) return;
+    const input = firstEntry.querySelector('input[type="number"]');
+    if (input) {
+      input.focus();
+      input.select();
     }
   },
 

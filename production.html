@@ -52,6 +52,7 @@
                       :data-product="p"
                       :data-date="day.dateKey"
                       x-model.number="day.inputs[p]"
+                      @keydown.enter.prevent="saveDayAndFocusNext($event, day)"
                     >
                   </td>
                 </template>
@@ -105,15 +106,10 @@
                 </div>
               </td>
               <template x-for="p in products" :key="p">
-                <template x-if="row.isDayOff">
-                  <td class="day-off-cell"></td>
-                </template>
-                <template x-if="!row.isDayOff && row.hasData">
-                  <td class="fw-600" x-text="formatValue(row.values[p])"></td>
-                </template>
-                <template x-if="!row.isDayOff && !row.hasData">
-                  <td></td>
-                </template>
+                <td
+                  :class="row.isDayOff ? 'day-off-cell' : (row.hasData ? 'fw-600' : '')"
+                  x-text="row.isDayOff ? '' : (row.hasData ? formatValue(row.values[p]) : '')"
+                ></td>
               </template>
             </tr>
           </template>

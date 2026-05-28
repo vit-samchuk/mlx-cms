@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Виробництво</title>
+
+<style>
+/* Общие стили */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+  height: 100vh;
+}
+
+/* Контейнер для редактора */
+.editor-panel {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-right: 1px solid #ddd;
+  box-sizing: border-box;
+  gap: 15px;
+  overflow-y: auto;
+}
+
+.editor-panel h2 {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+/* Контейнер для превью */
+.preview-panel {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  background-color: #f0f0f0;
+  box-sizing: border-box;
+  overflow: auto;
+}
+
+.preview-panel h2 {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.month-selector {
+  margin-bottom: 15px;
+}
+
+.month-selector select {
+  padding: 5px;
+  font-size: 14px;
+}
+
+.day-entry {
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: white;
+  border-radius: 4px;
+}
+
+.day-entry h3 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+}
+
+.product-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.product-inputs label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.product-inputs input[type="number"] {
+  width: 80px;
+  padding: 4px;
+}
+
+.day-off {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.day-off-btn {
+  padding: 6px 12px;
+  background: #ff9800;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.day-off-btn:hover {
+  background: #e68900;
+}
+
+.product-table {
+  border-collapse: collapse;
+  margin-bottom: 10px;
+}
+
+.product-table th, .product-table td {
+  border: 1px solid #ddd;
+  padding: 4px 8px;
+  text-align: center;
+}
+
+.product-table th {
+  background: #f2f2f2;
+  font-size: 12px;
+}
+
+.product-table input {
+  width: 100%;
+  padding: 4px;
+  border: none;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* Hide number input arrows */
+.product-table input[type="number"]::-webkit-outer-spin-button,
+.product-table input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.product-table input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.unit-toggle {
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.unit-toggle label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+}
+
+.save-btn {
+  padding: 6px 12px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.save-btn:hover {
+  background: #45a049;
+}
+
+.production-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.production-table thead tr th {
+  font-weight: 300;
+}
+
+.production-table th, .production-table td {
+  border: 1px solid #161616;
+  padding: 2px;
+  text-align: center;
+}
+
+.fw-600 {
+  font-weight: 600;
+}
+.production-table .td-date {
+  text-align: right;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.date-cell-content {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.delete-day-btn {
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 3px;
+  background: #d32f2f;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 18px;
+  opacity: 0;
+  padding: 0;
+  transition: opacity 0.15s ease;
+}
+
+.production-table tbody tr:hover .delete-day-btn,
+.delete-day-btn:focus {
+  opacity: 1;
+}
+
+.delete-day-btn:hover {
+  background: #b71c1c;
+}
+
+.production-table th {
+  background: #f2f2f2;
+}
+
+.day-off-cell {
+  background: #ffe6e6;
+}
+
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  margin-top: 20px;
+  border-top: 2px solid #333;
+}
+
+.summary-table th, .summary-table td {
+  border: 1px solid #161616;
+  padding: 4px 8px;
+  text-align: center;
+}
+
+.summary-table th {
+  background: #e8e8e8;
+  font-weight: 600;
+}
+
+.print_title {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 25px;
+    display: none;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  margin-top: 20px;
+  border-top: 2px solid #333;
+}
+
+.summary-table th, .summary-table td {
+  border: 1px solid #161616;
+  padding: 4px 8px;
+  text-align: center;
+}
+
+.summary-table th {
+  background: #e8e8e8;
+  font-weight: 600;
+}
+
+@media print
+{    
+    .no-print, .no-print *
+    {
+        display: none !important;
+    }
+
+    .preview-panel {
+      width: 100%;
+
+      h2, .month-selector, .unit-toggle {
+        display: none;
+      }
+    }
+    .print_title {
+        display: block;
+    }
+
+    .delete-day-btn {
+        display: none !important;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="editor-panel no-print">
+  <h2>Незаповнені дні</h2>
+  <div id="unfilledDays"></div>
+</div>
+
+<div class="preview-panel">
+  <h2>Виробництво за місяць</h2>
+  <div class="row">
+    <div class="month-selector">
+      <label for="monthSelect">Місяць:</label>
+      <select id="monthSelect"></select>
+    </div>
+    <div class="unit-toggle">
+      <label>
+        <input type="checkbox" id="tableUnitCheckbox"> шт
+      </label>
+    </div>
+  </div>
+  <div class="print_title" id="print_title_month"></div>
+  <table class="production-table" id="productionTable">
+    <thead>
+      <tr>
+        <th class="td-date"></th>
+        <th>Вільха 10</th>
+        <th>Вільха 8</th>
+        <th>Вільха-дуб 10</th>
+        <th>Вільха-Дуб 8</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+  <div id="summaryContainer"></div>
+</div>
+
+<script>
+const products = ['Вільха 10', 'Вільха 8', 'Вільха-дуб 10', 'Вільха-Дуб 8'];
+
+const DB_NAME = 'production_db';
+const DB_VERSION = 1;
+const STORE_NAME = 'settings';
+const DATA_KEY = 'production_data';
+
+let productionDataCache = {};
+let productionDbPromise = null;
+
+function openProductionDb() {
+  if (productionDbPromise) return productionDbPromise;
+
+  productionDbPromise = new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
+    };
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+
+  return productionDbPromise;
+}
+
+async function getProductionDataFromIndexedDb() {
+  const db = await openProductionDb();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.get(DATA_KEY);
+
+    request.onsuccess = () => resolve(request.result || {});
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function saveProductionDataToIndexedDb(data) {
+  const db = await openProductionDb();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.put(data, DATA_KEY);
+
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function getProductionDataFromLocalStorage() {
+  const data = localStorage.getItem(DATA_KEY);
+  return data ? JSON.parse(data) : {};
+}
+
+async function migrateProductionDataToIndexedDB(options = {}) {
+  const { overwrite = false } = options;
+  const localData = getProductionDataFromLocalStorage();
+  const indexedDbData = await getProductionDataFromIndexedDb();
+  const shouldMigrate = overwrite || Object.keys(indexedDbData).length === 0;
+
+  if (!shouldMigrate || Object.keys(localData).length === 0) {
+    productionDataCache = indexedDbData;
+    return { migrated: false, records: Object.keys(productionDataCache).length };
+  }
+
+  productionDataCache = localData;
+  await saveProductionDataToIndexedDb(productionDataCache);
+  return { migrated: true, records: Object.keys(productionDataCache).length };
+}
+
+window.migrateProductionDataToIndexedDB = migrateProductionDataToIndexedDB;
+
+function getProductionData() {
+  return productionDataCache;
+}
+
+function saveProductionData(data) {
+  productionDataCache = data;
+  saveProductionDataToIndexedDb(data).catch(error => {
+    console.error('Failed to save production data to IndexedDB', error);
+  });
+}
+
+function getDateKey(date) {
+  return date.toISOString().split('T')[0];
+}
+
+function getDaysInMonth(year, month) {
+  return new Date(year, month + 1, 0).getDate();
+}
+
+function getUnfilledDays(year, month) {
+  const data = getProductionData();
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth();
+  const daysInMonth = getDaysInMonth(year, month);
+  const unfilled = [];
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(year, month, day);
+    const key = getDateKey(date);
+    // Only allow input for days strictly before today
+    if (year === currentYear && month === currentMonth && date >= new Date(today.getFullYear(), today.getMonth(), today.getDate())) continue;
+    if (!data[key]) {
+      unfilled.push(date);
+    }
+  }
+  return unfilled;
+}
+
+function renderUnfilledDays(yearParam = null, monthParam = null) {
+  const today = new Date();
+  const year = yearParam !== null ? yearParam : today.getFullYear();
+  const month = monthParam !== null ? monthParam : today.getMonth();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth();
+  
+  // Get unfilled days for the selected month
+  const data = getProductionData();
+  const daysInMonth = getDaysInMonth(year, month);
+  const unfilled = [];
+  
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(year, month, day);
+    const key = getDateKey(date);
+    // Allow input for days before today (including if viewing previous month)
+    if (date >= new Date(today.getFullYear(), today.getMonth(), today.getDate())) continue;
+    if (!data[key]) {
+      unfilled.push(date);
+    }
+  }
+  
+  const container = document.getElementById('unfilledDays');
+  container.innerHTML = '';
+
+  unfilled.forEach(date => {
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'day-entry';
+    dayDiv.innerHTML = `
+      <h3>${date.toLocaleDateString('uk-UA')}</h3>
+      <div class="product-inputs">
+        <table class="product-table">
+          <thead>
+            <tr>
+              ${products.map(product => `<th>${product}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              ${products.map(product => `<td><input type="number" min="0" data-product="${product}" data-date="${getDateKey(date)}"></td>`).join('')}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="day-off">
+        <button class="day-off-btn" data-date="${getDateKey(date)}">Вихідний</button>
+        <button class="save-btn" data-date="${getDateKey(date)}">Зберегти</button>
+      </div>
+    `;
+    container.appendChild(dayDiv);
+
+    // Handle day off button
+    const dayOffBtn = dayDiv.querySelector('.day-off-btn');
+    dayOffBtn.addEventListener('click', () => {
+      const dateKey = dayOffBtn.dataset.date;
+      const data = getProductionData();
+      data[dateKey] = { dayOff: true };
+      saveProductionData(data);
+      renderUnfilledDays(year, month);
+      renderTable(year, month);
+    });
+
+    // Handle save button
+    const saveBtn = dayDiv.querySelector('.save-btn');
+    saveBtn.addEventListener('click', () => {
+      const dateKey = saveBtn.dataset.date;
+      const inputs = dayDiv.querySelectorAll('input[type="number"]');
+      const allEmpty = Array.from(inputs).every(input => !input.value || input.value === '0');
+      
+      if (allEmpty) {
+        if (confirm('Всі поля порожні. Зберегти нульове виготовлення за цей день?')) {
+          saveDayData(dateKey, inputs, year, month);
+        }
+      } else {
+        saveDayData(dateKey, inputs, year, month);
+      }
+    });
+  });
+}
+
+function saveDayData(dateKey, inputs, yearParam = null, monthParam = null) {
+  const data = getProductionData();
+  const entry = { products: {}, dayOff: false };
+  inputs.forEach(input => {
+    const product = input.dataset.product;
+    const value = parseInt(input.value) || 0;
+    entry.products[product] = value;
+  });
+  data[dateKey] = entry;
+  saveProductionData(data);
+  const today = new Date();
+  const year = yearParam !== null ? yearParam : today.getFullYear();
+  const month = monthParam !== null ? monthParam : today.getMonth();
+  renderUnfilledDays(year, month);
+  renderTable(year, month);
+}
+
+function deleteDayData(dateKey, year, month) {
+  const data = getProductionData();
+  if (!data[dateKey]) return;
+
+  delete data[dateKey];
+  saveProductionData(data);
+  renderUnfilledDays(year, month);
+  renderTable(year, month);
+}
+
+function renderTable(year, month) {
+  const data = getProductionData();
+  const daysInMonth = getDaysInMonth(year, month);
+  const tbody = document.getElementById('tableBody');
+  const tableUnitCheckbox = document.getElementById('tableUnitCheckbox');
+  const isKg = !tableUnitCheckbox.checked; // true: кг, false: шт
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth();
+  
+  tbody.innerHTML = '';
+  
+  // Calculate totals for each product
+  const totals = {};
+  products.forEach(product => {
+    totals[product] = 0;
+  });
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(year, month, day);
+    const key = getDateKey(date);
+    const entry = data[key];
+    const row = document.createElement('tr');
+
+    // full date dd.mm.yyyy
+    let cells = `
+      <td class='td-date'>
+        <div class="date-cell-content">
+          ${entry ? `<button type="button" class="delete-day-btn" data-date="${key}" title="Видалити дані за день" aria-label="Видалити дані за день">×</button>` : ''}
+          <span>${date.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
+        </div>
+      </td>
+    `;
+    if (entry && entry.dayOff) {
+      cells += products.map(() => '<td class="day-off-cell"></td>').join('');
+    } else if (entry) {
+      cells += products.map(product => {
+        const value = entry.products[product] || 0;
+        totals[product] += value;
+        return `<td class='fw-600'>${isKg ? value * 18 : value},00</td>`;
+      }).join('');
+    } else {
+      cells += products.map(() => '<td></td>').join('');
+    }
+
+    row.innerHTML = cells;
+    const deleteButton = row.querySelector('.delete-day-btn');
+    if (deleteButton) {
+      deleteButton.addEventListener('click', () => {
+        if (confirm('Видалити дані за цей день?')) {
+          deleteDayData(deleteButton.dataset.date, year, month);
+        }
+      });
+    }
+    tbody.appendChild(row);
+  }
+  
+  // Show summary if viewing a month before current
+  const summaryContainer = document.getElementById('summaryContainer');
+  if (year < currentYear || (year === currentYear && month < currentMonth)) {
+    let summaryHTML = '<table class="summary-table"><thead><tr><th>Всього</th>';
+    products.forEach(product => {
+      summaryHTML += `<th>${product}</th>`;
+    });
+    summaryHTML += '</tr></thead><tbody><tr><td class="fw-600">ПІДСУМОК</td>';
+    products.forEach(product => {
+      const totalValue = totals[product];
+      summaryHTML += `<td class='fw-600'>${isKg ? totalValue * 18 : totalValue},00</td>`;
+    });
+    summaryHTML += '</tr></tbody></table>';
+    summaryContainer.innerHTML = summaryHTML;
+  } else {
+    summaryContainer.innerHTML = '';
+  }
+}
+
+function populateMonthSelect() {
+  const select = document.getElementById('monthSelect');
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth();
+  const printTitle = document.getElementById('print_title_month');
+  const titleText = `Тріска за ${today.toLocaleDateString('uk-UA', { year: 'numeric', month: 'long' })}`;
+  printTitle.textContent = titleText.charAt(0).toUpperCase() + titleText.slice(1);
+
+
+  // Add current month and previous 12 months
+  for (let i = 0; i < 12; i++) {
+    const date = new Date(currentYear, currentMonth - i, 1);
+    const option = document.createElement('option');
+    option.value = `${date.getFullYear()}-${date.getMonth()}`;
+    option.textContent = date.toLocaleDateString('uk-UA', { year: 'numeric', month: 'long' });
+    select.appendChild(option);
+  }
+
+  select.value = `${currentYear}-${currentMonth}`;
+  select.addEventListener('change', () => {
+    const [year, month] = select.value.split('-').map(Number);
+    renderTable(year, month);
+    const titleText = `Тріска за ${new Date(year, month).toLocaleDateString('uk-UA', { year: 'numeric', month: 'long' })}`;
+    printTitle.textContent = titleText.charAt(0).toUpperCase() + titleText.slice(1);
+
+    if (year === currentYear && month === currentMonth) {
+      renderUnfilledDays();
+    } else {
+      // Allow editing for previous month if it's less than 3 days ago
+      const selectedDate = new Date(year, month + 1, 0); // Last day of selected month
+      const daysSincePreviousMonth = Math.floor((today - selectedDate) / (1000 * 60 * 60 * 24));
+      if (daysSincePreviousMonth < 3) {
+        renderUnfilledDays(year, month);
+      } else {
+        document.getElementById('unfilledDays').innerHTML = '<p>Редагування для цього періоду недоступне.</p>';
+      }
+    }
+  });
+
+  const tableUnitCheckbox = document.getElementById('tableUnitCheckbox');
+  tableUnitCheckbox.addEventListener('change', () => {
+    const [year, month] = select.value.split('-').map(Number);
+    renderTable(year, month);
+  });
+}
+async function initializePage() {
+  try {
+    await migrateProductionDataToIndexedDB();
+  } catch (error) {
+    console.error('Failed to initialize IndexedDB data', error);
+    productionDataCache = getProductionDataFromLocalStorage();
+  }
+
+  populateMonthSelect();
+  const today = new Date();
+  renderUnfilledDays();
+  renderTable(today.getFullYear(), today.getMonth());
+}
+
+initializePage();
+</script>
+
+</body>
+</html>

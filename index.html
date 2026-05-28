@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>A5 страница</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<style>
+/* Общие стили */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+  height: 100vh;
+}
+
+/* Контейнер для редактора */
+.editor-panel {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-right: 1px solid #ddd;
+  box-sizing: border-box;
+  gap: 15px;
+}
+
+.saved-sidebar li.selected {
+  background: #e6f7ff;
+}
+
+/* Modal confirm dialog */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.modal-overlay.active { display: flex; }
+.modal-box {
+  background: #fff;
+  padding: 16px;
+  border-radius: 6px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+}
+.modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:12px; }
+.saved-sidebar li .del-btn { float:right; margin-left:8px; background:transparent; border:none; cursor:pointer; color:#c00; }
+.saved-sidebar li { display:flex; align-items:center; justify-content:space-between; }
+
+.save-controls {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.save-controls input {
+  padding: 4px 6px;
+  font-size: 13px;
+}
+
+.editor-panel h2 {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+/* Textarea стили в редакторе */
+.editor-panel textarea {
+  flex: 1;
+  width: 100%;
+  border: 1px solid #ddd;
+  background: white;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  resize: none;
+  padding: 10px;
+  box-sizing: border-box;
+  border-radius: 4px;
+}
+
+.editor-panel textarea:focus {
+  outline: none;
+  border-color: #4CAF50;
+}
+
+/* Input в редакторе */
+.editor-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.editor-input-group label {
+  font-size: 12px;
+  font-weight: bold;
+  color: #555;
+}
+
+.editor-input-group input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  font-family: Arial, sans-serif;
+}
+
+.editor-input-group input:focus {
+  outline: none;
+  border-color: #4CAF50;
+}
+
+/* Контейнер для превью */
+.preview-panel {
+  width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background-color: #f0f0f0;
+  box-sizing: border-box;
+  overflow: auto;
+}
+
+/* Блок страницы A5 для экрана */
+.page {
+  width: 148mm;   /* A5 ширина */
+  height: 210mm;  /* A5 высота */
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 5mm;
+  background-color: #fff;
+  position: relative;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  border: 1px solid #ccc;
+}
+
+/* Внутреннее содержимое страницы */
+.page-content {
+  flex: 1;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: Arial, sans-serif;
+  font-size: 18px;
+  margin: 0;
+  padding: 15mm;
+  line-height: 1.4;
+  text-align: left;
+}
+
+/* Input в нижней части */
+.page-input {
+  margin-top: auto;
+  border-top: 1px solid #ccc;
+  text-align: center;
+}
+
+.page-input input {
+  width: 90%;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font-weight: bold;
+  font-size: 16px;
+  padding: 10px 0;
+  font-family: Arial, sans-serif;
+}
+
+.page-input input:focus {
+  outline: none;
+}
+
+/* Контейнер для печати */
+#printContainer {
+  display: none;
+}
+
+/* Установка полей для печати */
+@page {
+  margin: 0;
+}
+
+/* Стили печати */
+@media print {
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: white;
+    display: block;
+  }
+
+  .editor-panel,
+  .preview-panel {
+    display: none;
+  }
+
+  #printContainer {
+    display: block;
+    width: 210mm;
+    height: 297mm;
+    margin: 0;
+    padding: 0;
+    position: relative;
+  }
+
+  .rotated-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 210mm;
+    height: 148mm;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div style="position: absolute; top: 10px; right: 10px;">
+  <a href="production.html" style="padding: 5px 10px; background: #4CAF50; color: white; text-decoration: none; border-radius: 4px;">Виробництво</a>
+</div>
+
+<div class="editor-panel">
+  <h2>Редактор</h2>
+  <div class="editor-main" style="display:flex; flex:1; gap:10px;">
+    <div class="editor-fields" style="flex:1; display:flex; flex-direction:column; gap:15px;">
+      <textarea id="editorContent" placeholder="Введіть основний текст..."></textarea>
+      <div class="editor-input-group">
+        <label for="editorInput">Нижній текст:</label>
+        <input type="text" id="editorInput" placeholder="Введіть текст для нижньої частини..." value="">
+      </div>
+      <div class="save-controls" style="display:flex; gap:6px; align-items:center;">
+        <input type="text" id="saveName" placeholder="Ім'я для збереження" style="flex:1; padding:6px; font-size:13px;" />
+        <button id="saveBtn">Створити</button>
+        <button id="exportBtn">Export</button>
+        <button id="importBtn">Import</button>
+      </div>
+    </div>
+    <div class="saved-sidebar" style="width:450px; display:flex; flex-direction:column;">
+      <input type="text" id="searchInput" placeholder="Пошук..." style="padding:4px 6px; font-size:13px; margin-bottom:5px;" />
+      <span id="savedDate" style="font-size:12px; color:#555; margin-bottom:5px;"></span>
+      <ul id="savedList" style="list-style:none; padding:0; margin:0; overflow:auto; flex:1; border:1px solid #ddd; background:#fff;"></ul>
+    </div>
+  </div>
+</div>
+
+<div class="preview-panel">
+  <div class="page" id="contentToCapture">
+    <div class="page-content" id="pageContent"></div>
+    <div class="page-input">
+      <input type="text" id="pageInput" placeholder="Введіть текст для нижньої частини..." value="" readonly>
+    </div>
+  </div>
+</div>
+
+<div id="printContainer"></div>
+
+<!-- Confirm modal -->
+<div id="confirmModal" class="modal-overlay" role="dialog" aria-hidden="true">
+  <div class="modal-box">
+    <div id="confirmMessage">Ви впевнені?</div>
+    <div class="modal-actions">
+      <button id="confirmCancel">Скасувати</button>
+      <button id="confirmOk">OK</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="importInput" accept=".json" style="display:none;">
+
+<script>
+// Sync editor and preview
+const editorContent = document.getElementById('editorContent');
+const editorInput = document.getElementById('editorInput');
+const pageContent = document.getElementById('pageContent');
+const pageInput = document.getElementById('pageInput');
+
+// storage controls
+const saveName = document.getElementById('saveName');
+const saveBtn = document.getElementById('saveBtn');
+const searchInput = document.getElementById('searchInput');
+const savedDateEl = document.getElementById('savedDate');
+let currentSelectedName = null;
+// modal elements
+const confirmModal = document.getElementById('confirmModal');
+const confirmMessage = document.getElementById('confirmMessage');
+const confirmOk = document.getElementById('confirmOk');
+const confirmCancel = document.getElementById('confirmCancel');
+let _confirmCallback = null;
+
+function showConfirm(message, cb) {
+  confirmMessage.textContent = message;
+  _confirmCallback = cb;
+  confirmModal.classList.add('active');
+  confirmModal.setAttribute('aria-hidden', 'false');
+}
+
+function hideConfirm() {
+  confirmModal.classList.remove('active');
+  confirmModal.setAttribute('aria-hidden', 'true');
+  _confirmCallback = null;
+}
+
+confirmOk.addEventListener('click', () => {
+  if (_confirmCallback) _confirmCallback();
+  hideConfirm();
+});
+confirmCancel.addEventListener('click', () => {
+  hideConfirm();
+});
+
+
+function getSavedSets() {
+  let data = localStorage.getItem('a5_saved_sets');
+  return data ? JSON.parse(data) : {};
+}
+
+function storeSavedSets(obj) {
+  localStorage.setItem('a5_saved_sets', JSON.stringify(obj));
+}
+
+function populateList() {
+  const sets = getSavedSets();
+  const search = searchInput ? searchInput.value.toLowerCase() : '';
+  const list = document.getElementById('savedList');
+  list.innerHTML = '';
+  Object.keys(sets).forEach(name => {
+    const entry = sets[name];
+    if (search && !name.toLowerCase().includes(search) && !(entry.date && entry.date.toLowerCase().includes(search))) {
+      return;
+    }
+    const li = document.createElement('li');
+    li.dataset.name = name;
+    li.style.padding = '4px 6px';
+    li.style.cursor = 'pointer';
+
+    const label = document.createElement('span');
+    label.textContent = name + (entry && entry.date ? ` (${entry.date})` : '');
+    label.style.flex = '1';
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'del-btn';
+    delBtn.title = 'Видалити';
+    delBtn.innerHTML = '🗑';
+    delBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showConfirm(`Видалити запис "${name}"?`, () => {
+        const sets = getSavedSets();
+        delete sets[name];
+        storeSavedSets(sets);
+        if (currentSelectedName === name) {
+          currentSelectedName = null;
+          saveName.value = '';
+          editorContent.value = '';
+          editorInput.value = '';
+          pageContent.textContent = '';
+          pageInput.value = '';
+          savedDateEl.textContent = '';
+        }
+        populateList();
+      });
+    });
+
+    li.addEventListener('click', () => {
+      loadEntry(name);
+    });
+    if (currentSelectedName && currentSelectedName === name) {
+      li.classList.add('selected');
+    }
+    li.appendChild(label);
+    li.appendChild(delBtn);
+    list.appendChild(li);
+  });
+}
+
+function loadEntry(name) {
+  const sets = getSavedSets();
+  const entry = sets[name];
+  if (!entry) return;
+  editorContent.value = entry.text;
+  editorInput.value = entry.bottom;
+  pageContent.textContent = entry.text;
+  pageInput.value = entry.bottom;
+  savedDateEl.textContent = entry.date ? `Збережено: ${entry.date}` : '';
+  // prefill save input and highlight selection
+  saveName.value = name;
+  currentSelectedName = name;
+  saveBtn.textContent = 'Оновити';
+  populateList();
+}
+
+
+
+// search filter
+if (searchInput) {
+  searchInput.addEventListener('input', populateList);
+}
+
+// update save button label depending on whether name exists
+saveName.addEventListener('input', () => {
+  const name = saveName.value.trim();
+  if (!name) { saveBtn.textContent = 'Створити'; return; }
+  const sets = getSavedSets();
+  saveBtn.textContent = sets[name] ? 'Оновити' : 'Створити';
+});
+
+// save button click handler
+saveBtn.addEventListener('click', () => {
+  const name = saveName.value.trim();
+  if (!name) return;
+  const sets = getSavedSets();
+  const now = new Date().toLocaleDateString();
+  sets[name] = { text: editorContent.value, bottom: editorInput.value, date: now };
+  storeSavedSets(sets);
+  currentSelectedName = name;
+  populateList();
+  saveName.value = '';
+  savedDateEl.textContent = now ? `Збережено: ${now}` : '';
+  saveBtn.textContent = 'Створити';
+});
+
+// populate list on load
+populateList();
+
+editorContent.addEventListener('input', function() {
+  pageContent.textContent = this.value;
+});
+
+editorInput.addEventListener('input', function() {
+  pageInput.value = this.value;
+});
+
+// Initialize with some default content
+editorContent.value = 'Нова Пошта\n\nВідправник ПП «Мілекс Л»\n\nОтримувач ....\nПредставник\n...\n\n...\n...\n\nДоставку оплачує ...\nОголошена ... грн\n';
+pageContent.textContent = editorContent.value;
+pageInput.value = editorInput.value;
+
+// Catch Ctrl+P to trigger print
+// Use `code` so it works regardless of keyboard layout/language.
+document.addEventListener('keydown', function(event) {
+  if (event.ctrlKey && !event.altKey && !event.shiftKey && event.code === 'KeyP') {
+    console.log('Ctrl+P detected, preparing print...');
+    event.preventDefault();
+    preparePrint();
+  }
+});
+
+async function preparePrint() {
+  // Capture the A5 content as canvas
+  const element = document.getElementById('contentToCapture');
+  const canvas = await html2canvas(element, {
+    scale: 2,
+    useCORS: true,
+    logging: false
+  });
+
+  // Rotate the canvas 90 degrees
+  const rotatedCanvas = rotateCanvas(canvas, 90);
+
+  // Create image from rotated canvas
+  const img = document.createElement('img');
+  img.className = 'rotated-image';
+  
+  // Clear print container first
+  const printContainer = document.getElementById('printContainer');
+  printContainer.innerHTML = '';
+  printContainer.appendChild(img);
+
+  // Set image source and wait for it to decode (ensures browser has rendered it)
+  img.src = rotatedCanvas.toDataURL();
+
+  try {
+    // Modern browsers support img.decode() for a stable ready state
+    await img.decode();
+  } catch (e) {
+    console.warn('img.decode() failed or not supported, falling back to onload', e);
+    await new Promise((resolve) => {
+      img.onload = resolve;
+      img.onerror = resolve;
+    });
+  }
+
+  // Give the browser one more paint cycle before opening print dialog
+  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+  window.print();
+}
+
+function rotateCanvas(canvas, degrees) {
+  const radians = (degrees * Math.PI) / 180;
+  const sin = Math.abs(Math.sin(radians));
+  const cos = Math.abs(Math.cos(radians));
+
+  const newWidth = canvas.height * sin + canvas.width * cos;
+  const newHeight = canvas.height * cos + canvas.width * sin;
+
+  const newCanvas = document.createElement('canvas');
+  newCanvas.width = newWidth;
+  newCanvas.height = newHeight;
+
+  const ctx = newCanvas.getContext('2d');
+  ctx.translate(newWidth / 2, newHeight / 2);
+  ctx.rotate(radians);
+  ctx.drawImage(canvas, -canvas.width / 2, -canvas.height / 2);
+
+  return newCanvas;
+}
+
+// Export functionality
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const data = localStorage.getItem('a5_saved_sets') || '{}';
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'a5_saved_sets.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+// Import functionality
+const importInput = document.getElementById('importInput');
+document.getElementById('importBtn').addEventListener('click', () => {
+  importInput.click();
+});
+
+importInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    try {
+      const imported = JSON.parse(event.target.result);
+      const existing = getSavedSets();
+      for (const name in imported) {
+        if (!existing[name]) {
+          existing[name] = imported[name];
+        } else {
+          const existingDate = new Date(existing[name].date);
+          const importedDate = new Date(imported[name].date);
+          if (importedDate < existingDate) {
+            existing[name] = imported[name];
+          }
+        }
+      }
+      storeSavedSets(existing);
+      populateList();
+      alert('Import completed.');
+    } catch (err) {
+      alert('Invalid JSON file.');
+    }
+  };
+  reader.readAsText(file);
+  // Reset input
+  importInput.value = '';
+});
+</script>
+
+</body>
+</html>

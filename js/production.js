@@ -4,9 +4,17 @@ import Alpine from 'https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/+esm';
    Production Tracker — Alpine.js component
    ========================================================================== */
 
+const PRODUCTION_STORAGE_KEY = 'production_data';
+const PRODUCT_NAMES = ['Вільха 10', 'Вільха 8', 'Вільха-дуб 10', 'Вільха-Дуб 8'];
+const UNITS_PER_PIECE = 18;
+
+function createEmptyProductInputs() {
+  return Object.fromEntries(PRODUCT_NAMES.map((product) => [product, 0]));
+}
+
 Alpine.data('productionTracker', () => ({
   // Constants
-  products: ['Вільха 10', 'Вільха 8', 'Вільха-дуб 10', 'Вільха-Дуб 8'],
+  products: PRODUCT_NAMES,
 
   // State
   data: {},
@@ -57,12 +65,11 @@ Alpine.data('productionTracker', () => ({
         console.warn('Supabase load failed, using localStorage', e);
       }
     }
-    const raw = localStorage.getItem('production_data');
-    this.data = raw ? JSON.parse(raw) : {};
+    this.data = loadJsonObject(PRODUCTION_STORAGE_KEY);
   },
 
   persistData() {
-    localStorage.setItem('production_data', JSON.stringify(this.data));
+    saveJsonObject(PRODUCTION_STORAGE_KEY, this.data);
   },
 
   async upsertDay(dateKey, entry) {
@@ -88,8 +95,8 @@ Alpine.data('productionTracker', () => ({
 
   // Helpers
   formatValue(val) {
-    const v = val || 0;
-    return this.isPieces ? `${v},00` : `${v * 18},00`;
+    const v = Number(val) || 0;
+    return this.isPieces ? `${v},00` : `${v * UNITS_PER_PIECE},00`;
   },
 
   // Month selector
@@ -100,7 +107,7 @@ Alpine.data('productionTracker', () => ({
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       opts.push({
         value: `${d.getFullYear()}-${d.getMonth()}`,
-        label: d.toLocaleDateString('uk-UA', { year: 'numeric', month: 'long' }),
+        label: d.toLocaleDateString(DEFAULT_DATE_LOCALE, { year: 'numeric', month: 'long' }),
       });
     }
     this.monthOptions = opts;
@@ -109,7 +116,7 @@ Alpine.data('productionTracker', () => ({
   onMonthChange() {
     const { year, month } = parseMonthKey(this.selectedMonthKey);
     const d = new Date(year, month);
-    const title = `Тріска за ${d.toLocaleDateString('uk-UA', { year: 'numeric', month: 'long' })}`;
+    const title = `Тріска за ${d.toLocaleDateString(DEFAULT_DATE_LOCALE, { year: 'numeric', month: 'long' })}`;
     this.printTitle = title.charAt(0).toUpperCase() + title.slice(1);
     this.renderTable(year, month);
     this.renderUnfilledDays(year, month);
@@ -146,11 +153,7 @@ Alpine.data('productionTracker', () => ({
       if (this.data[dateKey]) continue;
 
       const date = new Date(year, month, day);
-      const inputs = {};
-      this.products.forEach((p) => {
-        inputs[p] = 0;
-      });
-      unfilled.push({ dateKey, label: date.toLocaleDateString('uk-UA'), inputs });
+      unfilled.push({ dateKey, label: formatDisplayDate(date), inputs: createEmptyProductInputs() });
     }
 
     this.unfilledDays = unfilled;
@@ -171,7 +174,7 @@ Alpine.data('productionTracker', () => ({
     }
   },
 
-  saveDayAndFocusNext(event, day) {
+  saveDayAndFocusNext(day) {
     this.saveDay(day, () => {
       setTimeout(() => this.focusFirstUnfilledInput(), 1000);
     });
@@ -190,7 +193,7 @@ Alpine.data('productionTracker', () => ({
   doSaveDay(day) {
     const entry = { products: {}, dayOff: false };
     this.products.forEach((p) => {
-      entry.products[p] = parseInt(day.inputs[p]) || 0;
+      entry.products[p] = Number.parseInt(day.inputs[p], 10) || 0;
     });
     this.data[day.dateKey] = entry;
     this.upsertDay(day.dateKey, entry);
@@ -262,7 +265,7 @@ Alpine.data('productionTracker', () => ({
 
       rows.push({
         dateKey,
-        dateLabel: date.toLocaleDateString('uk-UA', {
+        dateLabel: date.toLocaleDateString(DEFAULT_DATE_LOCALE, {
           day: '2-digit',
           month: '2-digit',
           year: 'numeric',

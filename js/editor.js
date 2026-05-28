@@ -4,6 +4,16 @@ import Alpine from 'https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/+esm';
    A5 Editor — Alpine.js component
    ========================================================================== */
 
+const A5_STORAGE_KEY = 'a5_saved_sets';
+
+function normalizeSetEntry(entry) {
+  return {
+    text: typeof entry?.text === 'string' ? entry.text : '',
+    bottom: typeof entry?.bottom === 'string' ? entry.bottom : '',
+    date: typeof entry?.date === 'string' ? entry.date : '',
+  };
+}
+
 Alpine.data('a5Editor', () => ({
   // State
   text: 'Нова Пошта\n\nВідправник ПП «Мілекс Л»\n\nОтримувач ....\nПредставник\n...\n\n...\n...\n\nДоставку оплачує ...\nОголошена ... грн\n',
@@ -48,7 +58,7 @@ Alpine.data('a5Editor', () => ({
   save() {
     const name = this.saveName.trim();
     if (!name) return;
-    const now = new Date().toLocaleDateString('uk-UA');
+    const now = formatDisplayDate(new Date());
     this.sets[name] = { text: this.text, bottom: this.bottom, date: now };
     this.persistSets();
     this.selectedName = name;
@@ -108,30 +118,35 @@ Alpine.data('a5Editor', () => ({
     const reader = new FileReader();
     reader.onload = async (e) => {
       try {
-        const imported = JSON.parse(e.target.result);
+        const imported = parseJsonObject(e.target.result, null);
+        if (!imported) throw new Error('Imported file must contain a JSON object');
+
         let added = 0;
         let skipped = 0;
-        for (const name in imported) {
+        Object.entries(imported).forEach(([name, rawEntry]) => {
+          const entry = normalizeSetEntry(rawEntry);
           if (!this.sets[name]) {
             // New entry — always add
-            this.sets[name] = imported[name];
+            this.sets[name] = entry;
+            added++;
+            return;
+          }
+
+          // Conflict — keep the newer version
+          const existDate = parseDate(this.sets[name].date);
+          const impDate = parseDate(entry.date);
+          if (impDate > existDate) {
+            this.sets[name] = entry;
             added++;
           } else {
-            // Conflict — keep the newer version
-            const existDate = parseDate(this.sets[name].date);
-            const impDate = parseDate(imported[name].date);
-            if (impDate > existDate) {
-              this.sets[name] = imported[name];
-              added++;
-            } else {
-              skipped++;
-            }
+            skipped++;
           }
-        }
+        });
         await this.persistSets();
-        alert(`Import completed.\nAdded/updated: ${added}\nSkipped (existing is newer): ${skipped}`);
-      } catch {
-        alert('Invalid JSON file.');
+        alert(`Імпорт завершено.\nДодано/оновлено: ${added}\nПропущено (наявний запис новіший): ${skipped}`);
+      } catch (e) {
+        console.warn('Import failed', e);
+        alert('Некоректний JSON-файл.');
       }
     };
     reader.readAsText(file);
@@ -156,7 +171,7 @@ Alpine.data('a5Editor', () => ({
           this.sets[row.name] = {
             text: row.content,
             bottom: row.bottom_text,
-            date: new Date(row.updated_at).toLocaleDateString('uk-UA'),
+            date: formatDisplayDate(new Date(row.updated_at)),
           };
         });
         return;
@@ -164,8 +179,7 @@ Alpine.data('a5Editor', () => ({
         console.warn('Supabase load failed, using localStorage', e);
       }
     }
-    const raw = localStorage.getItem('a5_saved_sets');
-    this.sets = raw ? JSON.parse(raw) : {};
+    this.sets = loadJsonObject(A5_STORAGE_KEY);
   },
 
   async persistSets() {
@@ -186,7 +200,7 @@ Alpine.data('a5Editor', () => ({
         console.warn('Supabase persist failed, saving locally', e);
       }
     }
-    localStorage.setItem('a5_saved_sets', JSON.stringify(this.sets));
+    saveJsonObject(A5_STORAGE_KEY, this.sets);
   },
 
   async deleteFromDb(name) {

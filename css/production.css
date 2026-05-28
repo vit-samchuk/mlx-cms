@@ -6,30 +6,43 @@
    ========================================================================== */
 .editor-panel {
   width: 50%;
-  padding: var(--pico-spacing);
+  padding: var(--gap-lg);
   overflow-y: auto;
-  border-right: 1px solid var(--pico-muted-border-color);
+  border-right: 1px solid var(--border-light);
+  background: var(--bg-page);
+}
+
+.editor-panel h2 {
+  margin: 0 0 var(--gap-lg) 0;
 }
 
 .preview-panel {
   width: 50%;
-  padding: var(--pico-spacing);
+  padding: var(--gap-lg);
   overflow-y: auto;
+  background: var(--bg-page);
+}
+
+.preview-panel h2 {
+  margin: 0 0 var(--gap-lg) 0;
 }
 
 /* Day entry card
    ========================================================================== */
 .day-entry {
-  border: 1px solid var(--pico-muted-border-color);
-  border-radius: var(--pico-border-radius);
-  padding: var(--pico-spacing);
-  margin-bottom: var(--pico-spacing);
-  background: var(--pico-background-color);
+  border: 1px solid var(--border-light);
+  border-radius: 3px;
+  padding: var(--gap-md) var(--gap-lg);
+  margin-bottom: var(--gap-md);
+  background: var(--bg-white);
 }
 
 .day-entry h3 {
-  margin: 0 0 calc(var(--pico-spacing) / 2) 0;
-  font-size: 1rem;
+  margin: 0 0 var(--gap-xs) 0;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
 }
 
 /* Product input table
@@ -37,27 +50,33 @@
 .product-table {
   border-collapse: collapse;
   width: 100%;
-  margin-bottom: calc(var(--pico-spacing) / 2);
+  margin-bottom: var(--gap-sm);
 }
 
 .product-table th,
 .product-table td {
-  border: 1px solid var(--pico-muted-border-color);
-  padding: calc(var(--pico-spacing) / 3);
+  border: 1px solid var(--border-light);
+  padding: 2px 4px;
   text-align: center;
-  font-size: 0.875rem;
+  font-size: 12px;
 }
 
 .product-table th {
-  background: var(--pico-secondary-focus);
+  background: #f8f8f8;
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--text-secondary);
 }
 
 .product-table input[type="number"] {
   width: 100%;
-  padding: calc(var(--pico-spacing) / 3);
+  padding: 2px 4px;
   border: none;
   text-align: center;
   margin: 0;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  background: transparent;
 }
 
 .product-table input[type="number"]::-webkit-outer-spin-button,
@@ -70,24 +89,30 @@
   -moz-appearance: textfield;
 }
 
+.product-table input[type="number"]:focus {
+  background: #e8f5e9;
+  outline: none;
+}
+
 /* Day actions
    ========================================================================== */
 .day-actions {
   display: flex;
-  gap: calc(var(--pico-spacing) / 2);
-  justify-content: center;
+  gap: var(--gap-xs);
+  justify-content: flex-end;
 }
 
 .day-actions button {
   width: auto;
   margin: 0;
-  padding: calc(var(--pico-spacing) / 3) var(--pico-spacing);
-  font-size: 0.875rem;
+  padding: 3px 8px;
+  font-size: 11px;
 }
 
 .btn-dayoff {
-  background: #ff9800;
-  border-color: #ff9800;
+  background: var(--accent-orange);
+  border-color: var(--accent-orange);
+  color: #fff;
 }
 
 .btn-dayoff:hover {
@@ -100,26 +125,34 @@
 .production-table {
   width: 100%;
   border-collapse: collapse;
-  background: var(--pico-background-color);
-  font-size: 0.875rem;
+  background: var(--bg-white);
+  font-size: 12px;
+  border: 1px solid var(--border-light);
 }
 
 .production-table th,
 .production-table td {
-  border: 1px solid #161616;
-  padding: 2px 4px;
+  border: 1px solid var(--border-light);
+  padding: 3px 6px;
   text-align: center;
 }
 
 .production-table th {
-  background: var(--pico-secondary-focus);
-  font-weight: 300;
+  background: #f8f8f8;
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.production-table tbody tr:hover {
+  background: #fafafa;
 }
 
 .td-date {
   text-align: right;
-  font-size: 0.8rem;
+  font-size: 11px;
   white-space: nowrap;
+  font-family: var(--font-mono);
 }
 
 .date-cell-content {
@@ -130,19 +163,19 @@
 }
 
 .delete-day-btn {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   border: 0;
-  border-radius: 3px;
-  background: #d32f2f;
+  border-radius: 2px;
+  background: var(--accent-red);
   color: #fff;
   cursor: pointer;
-  font-size: 12px;
-  line-height: 18px;
+  font-size: 11px;
+  line-height: 16px;
   padding: 0;
   margin: 0;
   opacity: 0;
-  transition: opacity 0.15s ease;
+  transition: opacity 0.1s;
 }
 
 .production-table tbody tr:hover .delete-day-btn,
@@ -151,7 +184,7 @@
 }
 
 .day-off-cell {
-  background: #ffe6e6;
+  background: #fff5f5;
 }
 
 /* Summary table
@@ -159,22 +192,25 @@
 .summary-table {
   width: 100%;
   border-collapse: collapse;
-  background: var(--pico-background-color);
-  margin-top: var(--pico-spacing);
+  background: var(--bg-white);
+  margin-top: var(--gap-lg);
   border-top: 2px solid #333;
-  font-size: 0.875rem;
+  font-size: 12px;
+  border: 1px solid var(--border-light);
 }
 
 .summary-table th,
 .summary-table td {
-  border: 1px solid #161616;
-  padding: 4px 8px;
+  border: 1px solid var(--border-light);
+  padding: 4px 6px;
   text-align: center;
 }
 
 .summary-table th {
-  background: #e8e8e8;
+  background: #f0f0f0;
   font-weight: 600;
+  font-size: 11px;
+  color: var(--text-secondary);
 }
 
 /* Controls row
@@ -183,13 +219,27 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--pico-spacing);
-  flex-wrap: wrap;
-  gap: calc(var(--pico-spacing) / 2);
+  margin-bottom: var(--gap-md);
+  flex-wrap: nowrap;
+  gap: var(--gap-sm);
 }
 
 .controls-row select {
   width: auto;
+  margin: 0;
+  font-size: 12px;
+}
+
+.controls-row label {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-xs);
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.controls-row input[type="checkbox"] {
   margin: 0;
 }
 
@@ -197,9 +247,9 @@
    ========================================================================== */
 .print-title {
   text-align: center;
-  font-size: 1.25rem;
+  font-size: 14px;
   font-weight: 700;
-  margin-bottom: var(--pico-spacing);
+  margin-bottom: var(--gap-lg);
   display: none;
 }
 

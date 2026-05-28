@@ -2,37 +2,152 @@
    Common styles — shared between index.html and production.html
    ========================================================================== */
 
+:root {
+  --gap-xs: 4px;
+  --gap-sm: 6px;
+  --gap-md: 8px;
+  --gap-lg: 12px;
+  --font-mono: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+  --border-light: #e0e0e0;
+  --border-medium: #ccc;
+  --bg-page: #f5f5f5;
+  --bg-white: #fff;
+  --text-primary: #333;
+  --text-secondary: #666;
+  --text-muted: #999;
+  --accent-green: #4caf50;
+  --accent-red: #d32f2f;
+  --accent-orange: #ff9800;
+  --accent-blue: #1976d2;
+}
+
+/* Global reset overrides for compact technical look
+   ========================================================================== */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+
+/* Override Pico's large defaults */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  margin: 0 0 var(--gap-sm) 0;
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+button, [role="button"], input[type="submit"],
+input[type="button"], input[type="reset"] {
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 3px;
+  margin: 0;
+}
+
+input[type="text"], input[type="number"], input[type="search"],
+input[type="email"], input[type="password"], input[type="url"],
+input[type="tel"], input[type="date"], select, textarea {
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: 3px;
+  border: 1px solid var(--border-light);
+  margin: 0;
+}
+
+label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: var(--gap-xs);
+}
+
 /* Navigation
    ========================================================================== */
 .app-nav {
   display: flex;
-  gap: var(--pico-spacing);
+  gap: var(--gap-lg);
   align-items: center;
-  padding: var(--pico-spacing);
-  background: var(--pico-background-color);
-  border-bottom: 1px solid var(--pico-muted-border-color);
+  padding: var(--gap-sm) var(--gap-lg);
+  background: var(--bg-white);
+  border-bottom: 1px solid var(--border-light);
+  height: 36px;
+}
+
+.app-nav a {
+  font-size: 12px;
+  text-decoration: none;
+  color: var(--text-secondary);
+  padding: var(--gap-xs) var(--gap-sm);
+  border-radius: 3px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.app-nav a:hover {
+  background: #f0f0f0;
+  color: var(--text-primary);
 }
 
 .app-nav a[aria-current="page"] {
-  font-weight: 700;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: #e8e8e8;
 }
 
 .app-nav .nav-brand {
   font-weight: 700;
   margin-right: auto;
+  font-size: 13px;
+  color: var(--text-primary);
+  letter-spacing: 0.5px;
 }
 
 /* Layout
    ========================================================================== */
 .app-layout {
   display: flex;
-  height: calc(100vh - 60px);
+  height: calc(100vh - 36px);
 }
 
 /* Utility
    ========================================================================== */
 .fw-600 {
   font-weight: 600;
+}
+
+small, .text-muted {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Dialog / Modal — compact
+   ========================================================================== */
+dialog article {
+  padding: var(--gap-lg);
+}
+
+dialog header {
+  padding: 0 0 var(--gap-sm) 0;
+}
+
+dialog footer {
+  padding: var(--gap-lg) 0 0 0;
+  display: flex;
+  gap: var(--gap-sm);
+  justify-content: flex-end;
+}
+
+dialog p {
+  margin: 0;
+  font-size: 13px;
+}
+
+dialog header button[rel="prev"] {
+  width: 20px;
+  height: 20px;
+  padding: 0;
 }
 
 /* Print base

@@ -8,37 +8,48 @@
   width: 50%;
   display: flex;
   flex-direction: column;
-  padding: var(--pico-spacing);
-  gap: var(--pico-spacing);
+  padding: var(--gap-lg);
+  gap: var(--gap-lg);
   overflow-y: auto;
-  border-right: 1px solid var(--pico-muted-border-color);
+  border-right: 1px solid var(--border-light);
+  background: var(--bg-page);
+}
+
+.editor-panel h2 {
+  margin: 0 0 var(--gap-sm) 0;
 }
 
 .editor-main {
   display: flex;
   flex: 1;
-  gap: var(--pico-spacing);
+  gap: var(--gap-lg);
+  min-height: 0;
 }
 
 .editor-fields {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--pico-spacing);
+  gap: var(--gap-lg);
 }
 
 .editor-fields textarea {
   flex: 1;
-  min-height: 200px;
+  min-height: 150px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  resize: none;
+  background: var(--bg-white);
 }
 
 /* Saved sets sidebar
    ========================================================================== */
 .saved-sidebar {
-  width: 400px;
+  width: 320px;
   display: flex;
   flex-direction: column;
-  gap: calc(var(--pico-spacing) / 2);
+  gap: var(--gap-xs);
 }
 
 .saved-list {
@@ -47,19 +58,21 @@
   margin: 0;
   overflow-y: auto;
   flex: 1;
-  border: 1px solid var(--pico-muted-border-color);
-  border-radius: var(--pico-border-radius);
-  background: var(--pico-background-color);
+  border: 1px solid var(--border-light);
+  border-radius: 3px;
+  background: var(--bg-white);
 }
 
 .saved-list li {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: calc(var(--pico-spacing) / 2) var(--pico-spacing);
+  padding: var(--gap-xs) var(--gap-sm);
   cursor: pointer;
-  border-bottom: 1px solid var(--pico-muted-border-color);
-  font-size: 0.875rem;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 12px;
+  font-family: var(--font-mono);
+  transition: background 0.1s;
 }
 
 .saved-list li:last-child {
@@ -67,37 +80,43 @@
 }
 
 .saved-list li:hover {
-  background: var(--pico-secondary-focus);
+  background: #f8f8f8;
 }
 
 .saved-list li[aria-selected="true"] {
-  background: var(--pico-primary-focus);
+  background: #e3f2fd;
 }
 
 .saved-list .del-btn {
   background: transparent;
   border: none;
   cursor: pointer;
-  color: var(--pico-del-color);
-  padding: 0 4px;
-  font-size: 1rem;
+  color: var(--accent-red);
+  padding: 0 3px;
+  font-size: 13px;
   line-height: 1;
   width: auto;
   margin: 0;
+  opacity: 0.6;
+  transition: opacity 0.1s;
+}
+
+.saved-list li:hover .del-btn {
+  opacity: 1;
 }
 
 /* Save controls
    ========================================================================== */
 .save-controls {
   display: flex;
-  gap: calc(var(--pico-spacing) / 2);
+  gap: var(--gap-xs);
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .save-controls input {
   flex: 1;
-  min-width: 120px;
+  min-width: 100px;
 }
 
 .save-controls button {
@@ -113,8 +132,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--pico-spacing);
-  background: #f0f0f0;
+  padding: var(--gap-lg);
+  background: var(--bg-page);
   overflow: auto;
 }
 
@@ -126,10 +145,10 @@
   display: flex;
   flex-direction: column;
   padding: 5mm;
-  background: #fff;
+  background: var(--bg-white);
   position: relative;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  border: 1px solid #ccc;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-light);
   flex-shrink: 0;
 }
 
@@ -147,7 +166,7 @@
 
 .page-input {
   margin-top: auto;
-  border-top: 1px solid #ccc;
+  border-top: 1px solid var(--border-light);
   text-align: center;
 }
 
@@ -202,11 +221,11 @@
 
   .saved-sidebar {
     width: 100%;
-    max-height: 300px;
+    max-height: 200px;
   }
 
   .page {
-    transform: scale(0.7);
+    transform: scale(0.65);
     transform-origin: top center;
   }
 }

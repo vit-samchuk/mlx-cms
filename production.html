@@ -31,7 +31,7 @@
     <div class="editor-panel no-print">
       <h2>Незаповнені дні</h2>
       <template x-if="unfilledDays.length === 0">
-        <p style="color: var(--pico-muted-color)">Всі дні заповнено ✓</p>
+        <p class="text-muted">Всі дні заповнено ✓</p>
       </template>
       <template x-for="day in unfilledDays" :key="day.dateKey">
         <div class="day-entry">

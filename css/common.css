@@ -1,0 +1,67 @@
+/* ==========================================================================
+   Common styles — shared between index.html and production.html
+   ========================================================================== */
+
+/* Navigation
+   ========================================================================== */
+.app-nav {
+  display: flex;
+  gap: var(--pico-spacing);
+  align-items: center;
+  padding: var(--pico-spacing);
+  background: var(--pico-background-color);
+  border-bottom: 1px solid var(--pico-muted-border-color);
+}
+
+.app-nav a[aria-current="page"] {
+  font-weight: 700;
+}
+
+.app-nav .nav-brand {
+  font-weight: 700;
+  margin-right: auto;
+}
+
+/* Layout
+   ========================================================================== */
+.app-layout {
+  display: flex;
+  height: calc(100vh - 60px);
+}
+
+/* Utility
+   ========================================================================== */
+.fw-600 {
+  font-weight: 600;
+}
+
+/* Print base
+   ========================================================================== */
+@page {
+  margin: 0;
+}
+
+@media print {
+  body {
+    background: white;
+    display: block;
+  }
+
+  .app-nav {
+    display: none !important;
+  }
+
+  .no-print,
+  .no-print * {
+    display: none !important;
+  }
+}
+
+/* Responsive base
+   ========================================================================== */
+@media (max-width: 992px) {
+  .app-layout {
+    flex-direction: column;
+    height: auto;
+  }
+}

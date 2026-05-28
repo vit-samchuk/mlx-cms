@@ -1,0 +1,238 @@
+/* ==========================================================================
+   Production page styles — production.html
+   ========================================================================== */
+
+/* Panels
+   ========================================================================== */
+.editor-panel {
+  width: 50%;
+  padding: var(--pico-spacing);
+  overflow-y: auto;
+  border-right: 1px solid var(--pico-muted-border-color);
+}
+
+.preview-panel {
+  width: 50%;
+  padding: var(--pico-spacing);
+  overflow-y: auto;
+}
+
+/* Day entry card
+   ========================================================================== */
+.day-entry {
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: var(--pico-border-radius);
+  padding: var(--pico-spacing);
+  margin-bottom: var(--pico-spacing);
+  background: var(--pico-background-color);
+}
+
+.day-entry h3 {
+  margin: 0 0 calc(var(--pico-spacing) / 2) 0;
+  font-size: 1rem;
+}
+
+/* Product input table
+   ========================================================================== */
+.product-table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: calc(var(--pico-spacing) / 2);
+}
+
+.product-table th,
+.product-table td {
+  border: 1px solid var(--pico-muted-border-color);
+  padding: calc(var(--pico-spacing) / 3);
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.product-table th {
+  background: var(--pico-secondary-focus);
+}
+
+.product-table input[type="number"] {
+  width: 100%;
+  padding: calc(var(--pico-spacing) / 3);
+  border: none;
+  text-align: center;
+  margin: 0;
+}
+
+.product-table input[type="number"]::-webkit-outer-spin-button,
+.product-table input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.product-table input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Day actions
+   ========================================================================== */
+.day-actions {
+  display: flex;
+  gap: calc(var(--pico-spacing) / 2);
+  justify-content: center;
+}
+
+.day-actions button {
+  width: auto;
+  margin: 0;
+  padding: calc(var(--pico-spacing) / 3) var(--pico-spacing);
+  font-size: 0.875rem;
+}
+
+.btn-dayoff {
+  background: #ff9800;
+  border-color: #ff9800;
+}
+
+.btn-dayoff:hover {
+  background: #e68900;
+  border-color: #e68900;
+}
+
+/* Production table
+   ========================================================================== */
+.production-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--pico-background-color);
+  font-size: 0.875rem;
+}
+
+.production-table th,
+.production-table td {
+  border: 1px solid #161616;
+  padding: 2px 4px;
+  text-align: center;
+}
+
+.production-table th {
+  background: var(--pico-secondary-focus);
+  font-weight: 300;
+}
+
+.td-date {
+  text-align: right;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.date-cell-content {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.delete-day-btn {
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 3px;
+  background: #d32f2f;
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 18px;
+  padding: 0;
+  margin: 0;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.production-table tbody tr:hover .delete-day-btn,
+.delete-day-btn:focus {
+  opacity: 1;
+}
+
+.day-off-cell {
+  background: #ffe6e6;
+}
+
+/* Summary table
+   ========================================================================== */
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--pico-background-color);
+  margin-top: var(--pico-spacing);
+  border-top: 2px solid #333;
+  font-size: 0.875rem;
+}
+
+.summary-table th,
+.summary-table td {
+  border: 1px solid #161616;
+  padding: 4px 8px;
+  text-align: center;
+}
+
+.summary-table th {
+  background: #e8e8e8;
+  font-weight: 600;
+}
+
+/* Controls row
+   ========================================================================== */
+.controls-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--pico-spacing);
+  flex-wrap: wrap;
+  gap: calc(var(--pico-spacing) / 2);
+}
+
+.controls-row select {
+  width: auto;
+  margin: 0;
+}
+
+/* Print title
+   ========================================================================== */
+.print-title {
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: var(--pico-spacing);
+  display: none;
+}
+
+/* Print
+   ========================================================================== */
+@media print {
+  .editor-panel {
+    display: none !important;
+  }
+
+  .preview-panel {
+    width: 100%;
+  }
+
+  .print-title {
+    display: block;
+  }
+
+  .delete-day-btn {
+    display: none !important;
+  }
+
+  .controls-row {
+    display: none !important;
+  }
+}
+
+/* Responsive
+   ========================================================================== */
+@media (max-width: 992px) {
+  .editor-panel,
+  .preview-panel {
+    width: 100%;
+    border-right: none;
+  }
+}

@@ -52,7 +52,7 @@
                       :data-product="p"
                       :data-date="day.dateKey"
                       x-model.number="day.inputs[p]"
-                      @keydown.enter.prevent="saveDayAndFocusNext($event, day)"
+                      @keydown.enter.prevent="saveDayAndFocusNext(day)"
                     >
                   </td>
                 </template>

@@ -5,7 +5,7 @@ import Alpine from 'https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/+esm';
    ========================================================================== */
 
 const PRODUCTION_STORAGE_KEY = 'production_data';
-const PRODUCT_NAMES = ['Вільха 10', 'Вільха 8', 'Вільха-дуб 10', 'Вільха-Дуб 8'];
+const PRODUCT_NAMES = ['Вільха 10', 'Вільха 8', 'Вільха-дуб 10', 'Вільха-дуб 8'];
 const UNITS_PER_PIECE = 18;
 
 function createEmptyProductInputs() {

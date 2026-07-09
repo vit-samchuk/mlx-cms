@@ -26,6 +26,7 @@
     <span class="nav-brand">Мілекс</span>
     <a href="index.html" aria-current="page">A5 Редактор</a>
     <a href="production.html">Виробництво</a>
+    <a href="price.html">Прайс</a>
   </nav>
 
   <div class="app-layout">
@@ -55,8 +56,8 @@
               placeholder="Ім'я для збереження"
             >
             <button @click="save()" x-text="saveLabel"></button>
-            <button class="secondary" @click="exportData()">Export</button>
-            <button class="secondary" @click="$refs.importInput.click()">Import</button>
+            <button class="secondary" @click="exportData()">Експорт</button>
+            <button class="secondary" @click="$refs.importInput.click()">Імпорт</button>
           </div>
         </div>
         <div class="saved-sidebar">
@@ -73,7 +74,7 @@
                 @click="load(item.name)"
               >
                 <span x-text="item.name + (item.date ? ' (' + item.date + ')' : '')"></span>
-                <button class="del-btn" @click.stop="confirmDelete(item.name)" title="Видалити">🗑</button>
+                <button class="del-btn" @click.stop="confirmDelete(item.name)" title="Видалити">×</button>
               </li>
             </template>
           </ul>

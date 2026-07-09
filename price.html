@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="uk" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Прайс</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/price.css">
+
+  <!-- Libs -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="js/supabase.js"></script>
+  <script defer src="js/utils.js"></script>
+  <script defer src="js/products-repository.js"></script>
+  <script type="module" src="js/price.js"></script>
+</head>
+
+<body x-data="priceList">
+  <nav class="app-nav">
+    <span class="nav-brand">Мілекс</span>
+    <a href="index.html">A5 Редактор</a>
+    <a href="production.html">Виробництво</a>
+    <a href="price.html" aria-current="page">Прайс</a>
+  </nav>
+
+  <div class="price-layout">
+    <section class="price-panel">
+      <div class="price-toolbar">
+        <h2>Прайс</h2>
+        <input type="search" x-model="search" placeholder="Пошук за назвою...">
+        <button @click="openProductDialog()">Новий товар</button>
+      </div>
+
+      <p x-show="errorMessage" class="error-message" x-text="errorMessage"></p>
+      <p x-show="loading" class="text-muted">Завантаження...</p>
+
+      <table class="price-table" x-show="!loading">
+        <thead>
+          <tr>
+            <th><button type="button" @click="sortBy('name')" x-text="'Назва' + sortMark('name')"></button></th>
+            <th><button type="button" @click="sortBy('current_cost')" x-text="'Собівартість' + sortMark('current_cost')"></button></th>
+            <th><button type="button" @click="sortBy('current_price')" x-text="'Продажна ціна' + sortMark('current_price')"></button></th>
+            <th><button type="button" @click="sortBy('updated_at')" x-text="'Оновлено' + sortMark('updated_at')"></button></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="product in filteredProducts" :key="product.id">
+            <tr :aria-selected="selectedProductId === product.id" @click="selectProduct(product.id, 'details')">
+              <td>
+                <span class="product-name" x-text="product.name"></span>
+                <small x-show="product.sku" x-text="'Артикул: ' + product.sku"></small>
+              </td>
+              <td x-text="formatMoney(product.current_cost)"></td>
+              <td x-text="formatMoney(product.current_price)"></td>
+              <td x-text="formatDate(product.updated_at)"></td>
+              <td>
+                <button class="secondary" @click.stop="openPurchaseDialog(product)">Нова закупка</button>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+
+      <p x-show="!loading && filteredProducts.length === 0" class="text-muted empty-state">
+        Товарів не знайдено.
+      </p>
+    </section>
+
+    <aside class="product-card">
+      <template x-if="selectedProduct">
+        <div>
+          <div class="product-card-header">
+            <div>
+              <h2 x-text="selectedProduct.name"></h2>
+              <small x-show="selectedProduct.sku" x-text="'Артикул: ' + selectedProduct.sku"></small>
+              <small x-show="selectedProduct.unit" x-text="'Одиниця: ' + selectedProduct.unit"></small>
+            </div>
+            <button @click="openPurchaseDialog(selectedProduct)">Нова закупка</button>
+          </div>
+
+          <div class="metric-grid">
+            <div>
+              <small>Собівартість</small>
+              <strong x-text="formatMoney(selectedProduct.current_cost)"></strong>
+            </div>
+            <div>
+              <small>Продажна ціна</small>
+              <strong x-text="formatMoney(selectedProduct.current_price)"></strong>
+            </div>
+            <div>
+              <small>Оновлено</small>
+              <strong x-text="formatDate(selectedProduct.updated_at)"></strong>
+            </div>
+          </div>
+
+          <div class="tabs">
+            <button :aria-selected="activeTab === 'details'" @click="activeTab = 'details'">Картка</button>
+            <button :aria-selected="activeTab === 'history'" @click="activeTab = 'history'">Історія</button>
+          </div>
+
+          <div x-show="activeTab === 'details'" class="details-list">
+            <div><span>Назва</span><strong x-text="selectedProduct.name"></strong></div>
+            <div><span>Артикул</span><strong x-text="selectedProduct.sku || '-'"></strong></div>
+            <div><span>Одиниця виміру</span><strong x-text="selectedProduct.unit || '-'"></strong></div>
+            <div><span>Створено</span><strong x-text="formatDate(selectedProduct.created_at)"></strong></div>
+          </div>
+
+          <div x-show="activeTab === 'history'">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>Дата</th>
+                  <th>Собівартість</th>
+                  <th>Продажна</th>
+                  <th>Коментар</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template x-for="entry in historyRows" :key="entry.id">
+                  <tr>
+                    <td x-text="formatDate(entry.purchase_date)"></td>
+                    <td x-text="formatMoney(entry.purchase_cost)"></td>
+                    <td x-text="formatMoney(entry.selling_price)"></td>
+                    <td x-text="entry.comment || '-'"></td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+            <p x-show="historyRows.length === 0" class="text-muted empty-state">Історії ще немає.</p>
+          </div>
+        </div>
+      </template>
+
+      <p x-show="!selectedProduct" class="text-muted empty-state">Оберіть товар у таблиці.</p>
+    </aside>
+  </div>
+
+  <dialog x-ref="productDialog">
+    <article class="price-dialog">
+      <header>
+        <button aria-label="Close" rel="prev" @click="$refs.productDialog.close()"></button>
+        <p><strong>Новий товар</strong></p>
+      </header>
+      <label>
+        Назва
+        <input type="text" x-model="productForm.name" @keydown.enter.prevent="createProduct()" required>
+      </label>
+      <label>
+        Артикул
+        <input type="text" x-model="productForm.sku">
+      </label>
+      <label>
+        Одиниця виміру
+        <input type="text" x-model="productForm.unit" placeholder="шт, кг, мішок...">
+      </label>
+      <footer>
+        <button class="secondary" @click="$refs.productDialog.close()">Скасувати</button>
+        <button @click="createProduct()">Створити</button>
+      </footer>
+    </article>
+  </dialog>
+
+  <dialog x-ref="purchaseDialog">
+    <article class="price-dialog">
+      <header>
+        <button aria-label="Close" rel="prev" @click="$refs.purchaseDialog.close()"></button>
+        <p><strong>Нова закупка</strong></p>
+      </header>
+      <label>
+        Дата закупки
+        <input type="date" x-model="purchaseForm.purchase_date" required>
+      </label>
+      <label>
+        Собівартість
+        <input type="number" min="0" step="0.01" x-model.number="purchaseForm.purchase_cost" required>
+      </label>
+      <label>
+        Продажна ціна
+        <input type="number" min="0" step="0.01" x-model.number="purchaseForm.selling_price" required>
+      </label>
+      <label>
+        Коментар
+        <textarea rows="3" x-model="purchaseForm.comment"></textarea>
+      </label>
+      <footer>
+        <button class="secondary" @click="$refs.purchaseDialog.close()">Скасувати</button>
+        <button @click="addPurchase()">Зберегти</button>
+      </footer>
+    </article>
+  </dialog>
+</body>
+</html>

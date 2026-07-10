@@ -26,7 +26,6 @@ function normalizeProduct(row) {
     id: row.id,
     name: typeof row.name === 'string' ? row.name : '',
     sku: typeof row.sku === 'string' ? row.sku : '',
-    unit: typeof row.unit === 'string' ? row.unit : '',
     current_cost: normalizeNumber(row.current_cost),
     current_price: normalizeNumber(row.current_price),
     created_at: row.created_at || '',
@@ -74,7 +73,6 @@ window.ProductRepository = {
       id: createId(),
       name: normalizeText(input.name),
       sku: normalizeText(input.sku) || null,
-      unit: normalizeText(input.unit) || null,
       current_cost: 0,
       current_price: 0,
       created_at: now,
@@ -88,7 +86,6 @@ window.ProductRepository = {
           .insert({
             name: product.name,
             sku: product.sku || null,
-            unit: product.unit || null,
             current_cost: product.current_cost,
             current_price: product.current_price,
           })
@@ -129,6 +126,39 @@ window.ProductRepository = {
       .filter((entry) => entry.product_id === productId)
       .map(normalizeHistory)
       .sort((a, b) => parseDate(b.purchase_date) - parseDate(a.purchase_date));
+  },
+
+  async deleteProduct(productId) {
+    if (!productId) throw new Error('Product ID is required for deletion.');
+
+    if (isSupabaseConfigured()) {
+      try {
+        const { error: historyError } = await supabaseClient
+          .from('product_cost_history')
+          .delete()
+          .eq('product_id', productId);
+        if (historyError) throw historyError;
+
+        const { error: productError } = await supabaseClient
+          .from('products')
+          .delete()
+          .eq('id', productId);
+        if (productError) throw productError;
+        return;
+      } catch (e) {
+        console.warn('Supabase delete failed, deleting locally', e);
+      }
+    }
+
+    const products = loadJsonObject(PRODUCTS_STORAGE_KEY);
+    delete products[productId];
+    saveJsonObject(PRODUCTS_STORAGE_KEY, products);
+
+    const history = loadJsonObject(PRODUCT_HISTORY_STORAGE_KEY);
+    const cleanedHistory = Object.fromEntries(
+      Object.entries(history).filter(([, entry]) => entry.product_id !== productId)
+    );
+    saveJsonObject(PRODUCT_HISTORY_STORAGE_KEY, cleanedHistory);
   },
 
   async addPurchase(productId, input) {

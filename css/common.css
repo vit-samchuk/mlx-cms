@@ -123,10 +123,51 @@ small, .text-muted {
   color: var(--text-muted);
 }
 
+.icon-inline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0.15em;
+  vertical-align: middle;
+  line-height: 1;
+  font-size: 1.05em;
+}
+
 /* Dialog / Modal — compact
    ========================================================================== */
-dialog article {
-  padding: var(--gap-lg);
+dialog {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100vh - 2rem);
+}
+
+dialog[open] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+button.danger {
+  background: var(--accent-red);
+  color: var(--bg-white);
+  border-color: #d32f2f;
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(2px);
+}
+
+dialog > article,
+dialog > .dialog-card {
+  padding: 25px;
+  border-radius: 6px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16);
+  width: min(100%, 440px);
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: auto;
 }
 
 dialog header {

@@ -1,0 +1,6 @@
+<nav x-data="navComponent()" class="app-nav">
+  <span class="nav-brand" x-text="brand"></span>
+  <template x-for="l in links" :key="l.href">
+    <a :href="l.href" :aria-current="isCurrent(l.href) ? 'page' : null" x-text="l.label"></a>
+  </template>
+</nav>

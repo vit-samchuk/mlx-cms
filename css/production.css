@@ -55,7 +55,7 @@
 
 .product-table th,
 .product-table td {
-  border: 1px solid var(--border-light);
+  border: 1px solid #8f8f8f;
   padding: 2px 4px;
   text-align: center;
   font-size: 12px;

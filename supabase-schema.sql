@@ -25,7 +25,6 @@ create table if not exists products (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   sku text,
-  unit text,
   current_cost numeric not null default 0,
   current_price numeric not null default 0,
   created_at timestamptz not null default now(),

@@ -15,23 +15,23 @@
   <script defer src="js/supabase.js"></script>
   <script defer src="js/utils.js"></script>
   <script defer src="js/products-repository.js"></script>
+  <script defer src="js/include.js"></script>
+  <script defer src="js/components/nav-alpine.js"></script>
   <script type="module" src="js/price.js"></script>
 </head>
 
 <body x-data="priceList">
-  <nav class="app-nav">
-    <span class="nav-brand">Мілекс</span>
-    <a href="index.html">A5 Редактор</a>
-    <a href="production.html">Виробництво</a>
-    <a href="price.html" aria-current="page">Прайс</a>
-  </nav>
+  <include src="partials/nav.html"></include>
 
   <div class="price-layout">
     <section class="price-panel">
       <div class="price-toolbar">
         <h2>Прайс</h2>
         <input type="search" x-model="search" placeholder="Пошук за назвою...">
-        <button @click="openProductDialog()">Новий товар</button>
+        <div class="toolbar-actions">
+          <button @click="openImportDialog()" x-html="renderTextWithIcons('Імпорт :import:')"></button>
+          <button @click="openProductDialog()" x-html="renderTextWithIcons('Новий товар :new:')"></button>
+        </div>
       </div>
 
       <p x-show="errorMessage" class="error-message" x-text="errorMessage"></p>
@@ -43,8 +43,8 @@
             <th><button type="button" @click="sortBy('name')" x-text="'Назва' + sortMark('name')"></button></th>
             <th><button type="button" @click="sortBy('current_cost')" x-text="'Собівартість' + sortMark('current_cost')"></button></th>
             <th><button type="button" @click="sortBy('current_price')" x-text="'Продажна ціна' + sortMark('current_price')"></button></th>
+            <th><button type="button" @click="" x-text="'Ціна з націнкою %'"></button></th>
             <th><button type="button" @click="sortBy('updated_at')" x-text="'Оновлено' + sortMark('updated_at')"></button></th>
-            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -56,10 +56,8 @@
               </td>
               <td x-text="formatMoney(product.current_cost)"></td>
               <td x-text="formatMoney(product.current_price)"></td>
+              <td x-text="formatMoney(product.current_cost * 1.4)"></td>
               <td x-text="formatDate(product.updated_at)"></td>
-              <td>
-                <button class="secondary" @click.stop="openPurchaseDialog(product)">Нова закупка</button>
-              </td>
             </tr>
           </template>
         </tbody>
@@ -77,9 +75,11 @@
             <div>
               <h2 x-text="selectedProduct.name"></h2>
               <small x-show="selectedProduct.sku" x-text="'Артикул: ' + selectedProduct.sku"></small>
-              <small x-show="selectedProduct.unit" x-text="'Одиниця: ' + selectedProduct.unit"></small>
             </div>
-            <button @click="openPurchaseDialog(selectedProduct)">Нова закупка</button>
+            <div class="product-card-actions">
+              <button class="danger" @click="deleteProduct(selectedProduct.id)" x-html="renderTextWithIcons(':delete:')"></button>
+              <button @click="openPurchaseDialog(selectedProduct)" x-html="renderTextWithIcons(':dollar:')"></button>
+            </div>
           </div>
 
           <div class="metric-grid">
@@ -105,7 +105,6 @@
           <div x-show="activeTab === 'details'" class="details-list">
             <div><span>Назва</span><strong x-text="selectedProduct.name"></strong></div>
             <div><span>Артикул</span><strong x-text="selectedProduct.sku || '-'"></strong></div>
-            <div><span>Одиниця виміру</span><strong x-text="selectedProduct.unit || '-'"></strong></div>
             <div><span>Створено</span><strong x-text="formatDate(selectedProduct.created_at)"></strong></div>
           </div>
 
@@ -140,7 +139,7 @@
   </div>
 
   <dialog x-ref="productDialog">
-    <article class="price-dialog">
+    <article class="dialog-card price-dialog">
       <header>
         <button aria-label="Close" rel="prev" @click="$refs.productDialog.close()"></button>
         <p><strong>Новий товар</strong></p>
@@ -153,19 +152,45 @@
         Артикул
         <input type="text" x-model="productForm.sku">
       </label>
-      <label>
-        Одиниця виміру
-        <input type="text" x-model="productForm.unit" placeholder="шт, кг, мішок...">
-      </label>
       <footer>
-        <button class="secondary" @click="$refs.productDialog.close()">Скасувати</button>
-        <button @click="createProduct()">Створити</button>
+        <button class="secondary" @click="$refs.productDialog.close()" x-html="renderTextWithIcons('Скасувати :close:')"></button>
+        <button @click="createProduct()" x-html="renderTextWithIcons('Створити :new:')"></button>
       </footer>
     </article>
   </dialog>
 
+  <dialog x-ref="importDialog">
+    <article class="dialog-card price-dialog">
+      <header>
+        <button aria-label="Close" rel="prev" @click="$refs.importDialog.close()"></button>
+        <p><strong>Імпорт товарів</strong></p>
+      </header>
+      <label>
+        Вставте дані або CSV
+        <textarea x-model="importForm.rawText" rows="10" placeholder="Назва;Артикул\nТовар 1;SKU1\nТовар 2;SKU2"></textarea>
+      </label>
+      <label>
+        Роздільник
+        <input type="text" x-model="importForm.delimiter" placeholder="; або ," maxlength="1">
+      </label>
+      <label>
+        Формат рядка
+        <select x-model="importForm.mode">
+          <option value="nameSku">Назва + Артикул</option>
+          <option value="skuName">Артикул + Назва</option>
+          <option value="csv">CSV (назва, артикул)</option>
+        </select>
+      </label>
+      <footer>
+        <button class="secondary" @click="$refs.importDialog.close()" x-html="renderTextWithIcons('Скасувати :close:')"></button>
+        <button @click="processImport()" x-html="renderTextWithIcons('Підтвердити :check:')"></button>
+      </footer>
+      <p class="import-hint">Підтримуються пусті артикулі. Якщо поле не заповнено — товар збережеться без артикулу.</p>
+    </article>
+  </dialog>
+
   <dialog x-ref="purchaseDialog">
-    <article class="price-dialog">
+    <article class="dialog-card price-dialog">
       <header>
         <button aria-label="Close" rel="prev" @click="$refs.purchaseDialog.close()"></button>
         <p><strong>Нова закупка</strong></p>
@@ -187,8 +212,8 @@
         <textarea rows="3" x-model="purchaseForm.comment"></textarea>
       </label>
       <footer>
-        <button class="secondary" @click="$refs.purchaseDialog.close()">Скасувати</button>
-        <button @click="addPurchase()">Зберегти</button>
+        <button class="secondary" @click="$refs.purchaseDialog.close()" x-html="renderTextWithIcons('Скасувати :close:')"></button>
+        <button @click="addPurchase()" x-html="renderTextWithIcons('Зберегти :save:')"></button>
       </footer>
     </article>
   </dialog>

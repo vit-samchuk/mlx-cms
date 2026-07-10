@@ -16,18 +16,15 @@
   <script defer src="js/supabase.js"></script>
   <script defer src="js/utils.js"></script>
   <script defer src="js/print.js"></script>
+  <script defer src="js/include.js"></script>
+  <script defer src="js/components/nav-alpine.js"></script>
   <!-- App (ES module — imports Alpine.js, runs after defer scripts) -->
   <script type="module" src="js/editor.js"></script>
 </head>
 
 <body x-data="a5Editor">
   <!-- Navigation -->
-  <nav class="app-nav">
-    <span class="nav-brand">Мілекс</span>
-    <a href="index.html" aria-current="page">A5 Редактор</a>
-    <a href="production.html">Виробництво</a>
-    <a href="price.html">Прайс</a>
-  </nav>
+  <include src="partials/nav.html"></include>
 
   <div class="app-layout">
     <!-- Editor -->
@@ -55,9 +52,9 @@
               @input="updateSaveLabel()"
               placeholder="Ім'я для збереження"
             >
-            <button @click="save()" x-text="saveLabel"></button>
-            <button class="secondary" @click="exportData()">Експорт</button>
-            <button class="secondary" @click="$refs.importInput.click()">Імпорт</button>
+            <button @click="save()" x-html="renderTextWithIcons('Зберегти :save:')"></button>
+            <button class="secondary" @click="exportData()" x-html="renderTextWithIcons('Експорт :export:')"></button>
+            <button class="secondary" @click="$refs.importInput.click()" x-html="renderTextWithIcons('Імпорт :import:')"></button>
           </div>
         </div>
         <div class="saved-sidebar">
@@ -85,11 +82,12 @@
     <!-- Preview -->
     <div class="preview-panel">
       <div class="page" id="contentToCapture">
-        <div class="page-content" x-text="text"></div>
+        <div class="page-content" x-html="renderTextWithIcons(text)"></div>
         <div class="page-input">
-          <span x-text="bottom" x-show="bottom"></span>
+          <span x-html="renderTextWithIcons(bottom)" x-show="bottom"></span>
         </div>
       </div>
+      <button @click="preparePrint()" x-html="renderTextWithIcons('Друк :print:')"></button>
     </div>
   </div>
 
@@ -101,7 +99,7 @@
 
   <!-- Confirm modal -->
   <dialog x-ref="confirmDialog">
-    <article>
+    <article class="dialog-card">
       <header>
         <button aria-label="Close" rel="prev" @click="$refs.confirmDialog.close()"></button>
         <p><strong>Підтвердження</strong></p>

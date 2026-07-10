@@ -9,6 +9,37 @@ function todayKey() {
   return toDateKey(now.getFullYear(), now.getMonth(), now.getDate());
 }
 
+function splitCsvLine(line, delimiter = ',') {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i += 1) {
+    const char = line[i];
+
+    if (char === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"';
+        i += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (char === delimiter && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+      continue;
+    }
+
+    current += char;
+  }
+
+  result.push(current.trim());
+  return result;
+}
+
 const productRepository = window.ProductRepository;
 
 Alpine.data('priceList', () => ({
@@ -24,7 +55,11 @@ Alpine.data('priceList', () => ({
   productForm: {
     name: '',
     sku: '',
-    unit: '',
+  },
+  importForm: {
+    rawText: '',
+    delimiter: ';',
+    mode: 'nameSku',
   },
   purchaseForm: {
     productId: '',
@@ -102,8 +137,74 @@ Alpine.data('priceList', () => ({
   },
 
   openProductDialog() {
-    this.productForm = { name: '', sku: '', unit: '' };
+    this.productForm = { name: '', sku: '' };
     this.$refs.productDialog.showModal();
+  },
+
+  openImportDialog() {
+    this.importForm = {
+      rawText: '',
+      delimiter: ';',
+      mode: 'nameSku',
+    };
+    this.$refs.importDialog.showModal();
+  },
+
+  async processImport() {
+    this.errorMessage = '';
+    const rawText = String(this.importForm.rawText || '').trim();
+    if (!rawText) {
+      this.errorMessage = 'Будь ласка, вставте дані для імпорту.';
+      return;
+    }
+
+    const delimiter = String(this.importForm.delimiter || ';') || ';';
+    const mode = this.importForm.mode;
+    const lines = rawText
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+
+    const parsedRows = lines.map((line) => {
+      const columns = mode === 'csv'
+        ? splitCsvLine(line, delimiter)
+        : line.split(delimiter).map((value) => value.trim());
+
+      const row = { name: '', sku: '' };
+      if (mode === 'skuName') {
+        row.sku = columns[0] || '';
+        row.name = columns[1] || '';
+      } else {
+        row.name = columns[0] || '';
+        row.sku = columns[1] || '';
+      }
+
+      return row;
+    }).filter((item) => item.name);
+
+    if (parsedRows.length === 0) {
+      this.errorMessage = 'Не знайдено жодного валідного товару для імпорту.';
+      return;
+    }
+
+    this.loading = true;
+    try {
+      const importedProducts = [];
+      for (const row of parsedRows) {
+        const created = await productRepository.createProduct(row);
+        importedProducts.push(created);
+      }
+      this.products = [...importedProducts, ...this.products.filter((item) => !importedProducts.some((newItem) => newItem.id === item.id))];
+      if (importedProducts.length > 0) {
+        await this.selectProduct(importedProducts[0].id, 'details');
+      }
+      this.$refs.importDialog.close();
+    } catch (e) {
+      console.warn('Import failed', e);
+      this.errorMessage = 'Помилка імпорту товарів. Спробуйте ще раз.';
+    } finally {
+      this.loading = false;
+    }
   },
 
   async createProduct() {
@@ -114,6 +215,33 @@ Alpine.data('priceList', () => ({
     this.products = [product, ...this.products.filter((item) => item.id !== product.id)];
     this.$refs.productDialog.close();
     await this.selectProduct(product.id, 'details');
+  },
+
+  async deleteProduct(productId) {
+    if (!productId) return;
+
+    const confirmed = window.confirm('Впевнені, що хочете видалити цей товар та всю історію?');
+    if (!confirmed) return;
+
+    this.loading = true;
+    this.errorMessage = '';
+
+    try {
+      await productRepository.deleteProduct(productId);
+      this.products = this.products.filter((product) => product.id !== productId);
+
+      if (this.selectedProductId === productId) {
+        this.selectedProductId = this.products.length > 0 ? this.products[0].id : null;
+        this.selectedHistory = this.selectedProductId
+          ? await productRepository.listHistory(this.selectedProductId)
+          : [];
+      }
+    } catch (e) {
+      console.warn('Product delete failed', e);
+      this.errorMessage = 'Не вдалося видалити товар. Спробуйте ще раз.';
+    } finally {
+      this.loading = false;
+    }
   },
 
   async selectProduct(productId, tab = this.activeTab) {

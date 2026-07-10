@@ -40,6 +40,18 @@
   margin: 0;
 }
 
+.toolbar-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--gap-xs);
+}
+
+.import-hint {
+  margin-top: var(--gap-sm);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
 .price-table,
 .history-table {
   width: 100%;
@@ -113,6 +125,12 @@
   margin-bottom: var(--gap-lg);
 }
 
+.product-card-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-xs);
+}
+
 .product-card-header h2 {
   margin-bottom: var(--gap-xs);
 }
@@ -184,16 +202,21 @@
 }
 
 .price-dialog {
-  min-width: 360px;
+  min-width: min(360px, 100%);
+  width: min(100%, 420px);
+  max-width: 100%;
 }
 
 .price-dialog label {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-xs);
   margin-bottom: var(--gap-sm);
 }
 
 .price-dialog textarea {
   resize: vertical;
+  min-height: 84px;
 }
 
 @media (max-width: 992px) {

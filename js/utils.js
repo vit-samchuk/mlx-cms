@@ -4,6 +4,42 @@
 
 const DEFAULT_DATE_LOCALE = 'uk-UA';
 
+const ICON_TOKENS = {
+  save: '<span class="icon-inline" aria-hidden="true">💾</span>',
+  export: '<span class="icon-inline" aria-hidden="true">📤</span>',
+  import: '<span class="icon-inline" aria-hidden="true">📥</span>',
+  print: '<span class="icon-inline" aria-hidden="true">🖨️</span>',
+  new: '<span class="icon-inline" aria-hidden="true">➕</span>',
+  delete: '<span class="icon-inline" aria-hidden="true">🗑️</span>',
+  close: '<span class="icon-inline" aria-hidden="true">✕</span>',
+  check: '<span class="icon-inline" aria-hidden="true">✓</span>',
+  package: '<span class="icon-inline" aria-hidden="true">📦</span>',
+  dollar: '<span class="icon-inline" aria-hidden="true">💵</span>',
+};
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function renderTextWithIcons(text) {
+  if (typeof text !== 'string' || text.length === 0) return '';
+
+  const escaped = escapeHtml(text);
+  return escaped.replace(/:([a-z0-9_-]+):/g, (match, token) => ICON_TOKENS[token] || match);
+}
+
+if (typeof window !== 'undefined') {
+  window.renderTextWithIcons = renderTextWithIcons;
+}
+if (typeof globalThis !== 'undefined') {
+  globalThis.renderTextWithIcons = renderTextWithIcons;
+}
+
 /**
  * Format a Date object for UI labels using the project locale.
  */

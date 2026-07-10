@@ -130,11 +130,18 @@
 .preview-panel {
   width: 50%;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: var(--gap-lg);
   background: var(--bg-page);
   overflow: auto;
+
+  button {
+    margin-top: var(--gap-lg);
+    padding: var(--gap-sm) var(--gap-md);
+    min-width: 100px;
+  }
 }
 
 /* A5 page mock

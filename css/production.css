@@ -30,7 +30,7 @@
 /* Day entry card
    ========================================================================== */
 .day-entry {
-  border: 1px solid var(--border-light);
+  border: 1px solid 
   border-radius: 3px;
   padding: var(--gap-md) var(--gap-lg);
   margin-bottom: var(--gap-md);
@@ -127,12 +127,12 @@
   border-collapse: collapse;
   background: var(--bg-white);
   font-size: 12px;
-  border: 1px solid var(--border-light);
+  border: 1px solid 
 }
 
 .production-table th,
 .production-table td {
-  border: 1px solid var(--border-light);
+  border: 1px solid #373737;
   padding: 3px 6px;
   text-align: center;
 }
